@@ -1,3 +1,6 @@
+import os
+DRY_RUN = os.getenv("DRY_RUN", "false").lower() == "true"
+
 from services.kite_service import get_kite
 import datetime
 import logging
@@ -44,6 +47,10 @@ def place_order(trade_type: str):
 
     option_type = "PE" if trade_type == "buy" else "CE"
     symbol = f"BANKNIFTY{expiry}{atm}{option_type}"
+
+    if DRY_RUN:
+        logger.info(f"[DRY_RUN] Skipped placing order: {symbol}")
+        return {"status": "dry_run", "symbol": symbol, "message": "trade skipped (dry run mode)"}
 
     try:
         order_id = kite.place_order(

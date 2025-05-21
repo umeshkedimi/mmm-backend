@@ -54,7 +54,9 @@ def handle_command(text):
 
     try:
         url = f"{API_URL}{endpoint}"
-        res = requests.request(method, url)
+        headers = {"X-API-KEY": os.getenv("API_KEY_HEADER")}
+        res = requests.request(method, url, headers=headers)
+        
         if res.status_code == 200:
             send_msg(f"✅ {text.upper()} successful: {res.json()}")
         else:

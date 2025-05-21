@@ -83,7 +83,7 @@ def main():
         except Exception as e:
             print(f"Telegram loop error: {e}")
 
-        time.sleep(5)
+        time.sleep(1)
 
 if __name__ == "__main__":
     print("🔁 Telegram listener started...")

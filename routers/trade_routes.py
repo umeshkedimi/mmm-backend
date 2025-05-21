@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from services.kite_service import get_kite
 from services import trade_manager
 from services import pnl_tracker
+from services import kill_switch
 
 router = APIRouter(prefix="/trade", tags=["Trade"])
 
@@ -25,5 +26,10 @@ def sell_order():
 @router.get("/pnl")
 def get_pnl():
     return pnl_tracker.get_pnl()
+
+@router.post("/kill")
+def trigger_kill_switch():
+    return kill_switch.activate_kill_switch()
+
 
 

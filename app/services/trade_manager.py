@@ -1,6 +1,11 @@
 import os
 DRY_RUN = os.getenv("DRY_RUN", "false").lower() == "true"
 
+from app.db.db_setup import get_db
+from app.db.crud.trade_log import create_trade_log
+from app.db.schemas import TradeLogCreate
+from sqlalchemy.orm import Session
+
 from app.services.kite_service import get_kite
 import datetime
 import logging
@@ -63,6 +68,17 @@ def place_order(trade_type: str):
             order_type=kite.ORDER_TYPE_MARKET
         )
         logger.info(f"✅ Order placed: {symbol}")
+
+        db: Session = get_db()
+        create_trade_log(db, TradeLogCreate(
+            symbol=symbol,
+            direction=trade_type,
+            quantity=30,
+            price=kite.ltp(f"NFO:{symbol}")[f"NFO: + {symbol}"]["last_price"],
+            pnl=None,
+            exit_reason=None
+        ))
+
         return {"status": "success", "symbol": symbol, "order_id": order_id}
     except Exception as e:
         logger.error(f"❌ Failed to place order: {e}")

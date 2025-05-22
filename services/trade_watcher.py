@@ -3,16 +3,13 @@ import time
 from services.kite_service import get_kite
 from services.pnl_tracker import get_pnl
 from services.kill_switch import activate_kill_switch
-from dotenv import load_dotenv
-
-load_dotenv()
 
 kite = get_kite()
 
-TARGET = int(os.getenv("TARGET_PROFIT", 5100))
-SL = int(os.getenv("STOP_LOSS", -4500))
-TRAIL_STEP = int(os.getenv("TRAIL_STEP", 5100))
-TRAIL_GAP = int(os.getenv("TRAIL_GAP", 200))
+TARGET = int(os.getenv("TARGET_PROFIT", 500))
+SL = int(os.getenv("STOP_LOSS", -450))
+TRAIL_STEP = int(os.getenv("TRAIL_STEP", 500))
+TRAIL_GAP = int(os.getenv("TRAIL_GAP", 50))
 
 trail_sl = SL
 next_trail_target = TARGET + TRAIL_STEP

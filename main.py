@@ -1,9 +1,27 @@
 from fastapi import FastAPI
-from routers import trade_routes
 import uvicorn
-from services.trade_watcher import monitor_trades
 import threading
+from dotenv import load_dotenv
+import os
 
+# ✅ Load environment variables
+load_dotenv(override=True)
+
+# ✅ Validate critical env config
+def validate_config():
+    required_keys = ["DRY_RUN", "API_KEY_HEADER"]
+    for key in required_keys:
+        value = os.getenv(key)
+        if value is None:
+            raise RuntimeError(f"❌ {key} is missing in .env file!")
+    print(f"✅ DRY_RUN = {os.getenv('DRY_RUN')}")
+    print("✅ Environment variables loaded successfully.")
+
+validate_config()
+
+# ✅ Import after env is loaded
+from routers import trade_routes
+from services.trade_watcher import monitor_trades
 
 app = FastAPI(
     title="BankNifty MCP Server",
@@ -13,7 +31,7 @@ app = FastAPI(
 
 app.include_router(trade_routes.router)
 
-# Start watcher thread
+# ✅ Start watcher thread
 watcher_thread = threading.Thread(target=monitor_trades, daemon=True)
 watcher_thread.start()
 

@@ -2,10 +2,7 @@ import os
 import pyotp
 import requests
 from urllib.parse import urlparse, parse_qs
-from kiteconnect import KiteConnect
-from dotenv import load_dotenv
-
-load_dotenv() # Load environment variables from .env file
+from kiteconnect import KiteConnect # Load environment variables from .env file
 
 kite = KiteConnect(api_key=os.getenv("API_KEY"))
 

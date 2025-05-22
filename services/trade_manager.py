@@ -45,7 +45,7 @@ def place_order(trade_type: str):
     if not expiry or not atm:
         return {"error": "Could not fetch expiry or strike"}
 
-    option_type = "PE" if trade_type == "buy" else "CE"
+    option_type = "CE" if trade_type == "buy" else "PE"
     symbol = f"BANKNIFTY{expiry}{atm}{option_type}"
 
     if DRY_RUN:
@@ -57,8 +57,8 @@ def place_order(trade_type: str):
             variety=kite.VARIETY_REGULAR,
             exchange="NFO",
             tradingsymbol=symbol,
-            transaction_type=kite.TRANSACTION_TYPE_SELL,
-            quantity=60,
+            transaction_type=kite.TRANSACTION_TYPE_BUY,
+            quantity=30,
             product=kite.PRODUCT_MIS,
             order_type=kite.ORDER_TYPE_MARKET
         )

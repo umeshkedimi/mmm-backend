@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
-from services.kite_service import get_kite
-from services import trade_manager, pnl_tracker, kill_switch
-from utils.auth import verify_api_key
+from app.services.kite_service import get_kite
+from app.services import trade_manager, pnl_tracker, kill_switch
+from app.utils.auth import verify_api_key
 
 router = APIRouter(prefix="/trade", tags=["Trade"])
 

@@ -1,8 +1,8 @@
 import os
 import time
-from services.kite_service import get_kite
-from services.pnl_tracker import get_pnl
-from services.kill_switch import activate_kill_switch
+from app.services.kite_service import get_kite
+from app.services.pnl_tracker import get_pnl
+from app.services.kill_switch import activate_kill_switch
 
 kite = get_kite()
 

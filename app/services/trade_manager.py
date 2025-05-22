@@ -1,7 +1,7 @@
 import os
 DRY_RUN = os.getenv("DRY_RUN", "false").lower() == "true"
 
-from services.kite_service import get_kite
+from app.services.kite_service import get_kite
 import datetime
 import logging
 

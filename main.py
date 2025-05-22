@@ -20,8 +20,8 @@ def validate_config():
 validate_config()
 
 # ✅ Import after env is loaded
-from routers import trade_routes
-from services.trade_watcher import monitor_trades
+from app.routers import trade_routes
+from app.services.trade_watcher import monitor_trades
 
 app = FastAPI(
     title="BankNifty MCP Server",

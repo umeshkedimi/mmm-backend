@@ -1,4 +1,4 @@
-from services.kite_service import get_kite
+from app.services.kite_service import get_kite
 import logging
 
 kite = get_kite()

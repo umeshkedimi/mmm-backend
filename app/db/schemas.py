@@ -16,3 +16,19 @@ class TradeLogOut(TradeLogCreate):
 
     class Config:
         orm_mode = True
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+    broker: str
+    api_key: str
+    api_secret: str
+    totp_secret: str
+
+class UserOut(BaseModel):
+    id: int
+    username: str
+    broker: str
+
+    class Config:
+        orm_mode = True

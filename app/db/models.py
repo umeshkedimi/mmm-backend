@@ -14,3 +14,15 @@ class TradeLog(Base):
     price = Column(Float, nullable=False)
     pnl = Column(Float, nullable=False)
     exit_reason = Column(String, nullable=True) # e.g. "stop_loss", "take_profit", "manual_exit"
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    broker = Column(String, nullable=False)  # "zerodha" or "dhan"
+    api_key = Column(String, nullable=True)
+    api_secret = Column(String, nullable=True)
+    totp_secret = Column(String, nullable=True)

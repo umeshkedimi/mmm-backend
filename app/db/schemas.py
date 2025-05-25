@@ -17,7 +17,7 @@ class TradeLogOut(TradeLogCreate):
     timestamp: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserCreate(BaseModel):
@@ -35,7 +35,7 @@ class UserOut(BaseModel):
     broker: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class BrokerAccountCreate(BaseModel):

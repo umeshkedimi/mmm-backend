@@ -15,7 +15,7 @@ def ping():
     return {"message": "MCP Server is running!"}
 
 @router.get("/user_info")
-def get_user():
+def get_user(current_user: User = Depends(get_current_user)):
     kite = get_kite()
     return kite.profile()
 

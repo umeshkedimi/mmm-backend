@@ -8,6 +8,7 @@ load_dotenv()
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = str(os.getenv("TELEGRAM_CHAT_ID"))
 API_URL = os.getenv("MCP_API_URL")
+TELEGRAM_JWT_TOKEN = os.getenv("TELEGRAM_JWT_TOKEN")
 
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
@@ -54,8 +55,12 @@ def handle_command(text):
 
     try:
         url = f"{API_URL}{endpoint}"
-        headers = {"X-API-KEY": os.getenv("API_KEY_HEADER")}
+
+        headers = {
+            "Authorization": f"Bearer {os.getenv('TELEGRAM_JWT_TOKEN')}"
+            }
         res = requests.request(method, url, headers=headers)
+
         
         if res.status_code == 200:
             send_msg(f"✅ {text.upper()} successful: {res.json()}")

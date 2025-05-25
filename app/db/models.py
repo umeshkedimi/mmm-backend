@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, func
+from sqlalchemy import Column, Integer, String, Float, DateTime, func, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -26,3 +27,18 @@ class User(Base):
     api_key = Column(String, nullable=True)
     api_secret = Column(String, nullable=True)
     totp_secret = Column(String, nullable=True)
+
+    broker_accounts = relationship("BrokerAccount", back_populates="user")
+
+
+class BrokerAccount(Base):
+    __tablename__ = "broker_accounts"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    broker = Column(String, nullable=False)  # "zerodha", "dhan", etc.
+    api_key = Column(String, nullable=True)
+    api_secret = Column(String, nullable=True)
+    totp_secret = Column(String, nullable=True)
+
+    user = relationship("User", back_populates="broker_accounts")

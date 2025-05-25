@@ -6,7 +6,7 @@ from app.db.db_setup import get_db
 from app.db.crud import broker_account
 from app.db.models import User
 
-router = APIRouter()
+router = APIRouter(prefix="/brokers", tags=["Broker Accounts"])
 
 @router.post("/broker-account", response_model=BrokerAccountOut)
 def add_broker_account(
@@ -16,7 +16,7 @@ def add_broker_account(
 ):
     return broker_account.create_broker_account(db, current_user.id, account)
 
-@router.get("/broker-accounts", response_model=list[BrokerAccountOut])
+@router.get("/broker-account", response_model=list[BrokerAccountOut])
 def list_accounts(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)

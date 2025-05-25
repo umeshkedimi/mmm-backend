@@ -26,7 +26,12 @@ from app.services.trade_watcher import monitor_trades
 app = FastAPI(
     title="BankNifty MCP Server",
     description="A modular MCP server to manage BankNifty trades using Zerodha kite API",
-    version="1.0.0"
+    version="1.0.0",
+    openapi_tags=[
+        {"name": "Auth", "description": "User registration and login"},
+        {"name": "Trade", "description": "Order execution routes"},
+        {"name": "Broker Accounts", "description": "Manage linked broker accounts"}
+    ]
 )
 
 app.include_router(trade_routes.router)

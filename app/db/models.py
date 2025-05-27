@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, func, ForeignKey
+from sqlalchemy import Boolean, Column, Integer, String, Float, DateTime, func, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -27,6 +27,8 @@ class User(Base):
     api_key = Column(String, nullable=True)
     api_secret = Column(String, nullable=True)
     totp_secret = Column(String, nullable=True)
+    kill_switch = Column(Boolean, default=False)
+    is_admin = Column(Boolean, default=False)
 
     broker_accounts = relationship("BrokerAccount", back_populates="user")
 

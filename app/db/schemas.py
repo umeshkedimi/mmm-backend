@@ -37,6 +37,16 @@ class UserOut(BaseModel):
     class Config:
         from_attributes = True
 
+class UserAdminOut(UserOut):
+    id: int
+    username: str
+    broker: str
+    is_admin: bool
+    kill_switch: bool
+
+    class Config:
+        from_attributes = True
+
 
 class BrokerAccountCreate(BaseModel):
     broker: str

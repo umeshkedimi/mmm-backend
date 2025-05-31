@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
 
-from app.db.models import Base  # 👈 your models.Base
+from app.db.db_setup import Base # 👈 your models.Base
+from app.db.models import user, broker_account
 load_dotenv()
 
 

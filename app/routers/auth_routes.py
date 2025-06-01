@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from app.db.schemas import UserCreate, UserOut
-from app.db.crud.user import create_user, get_user_by_username
+from app.schemas.user import UserCreate, UserOut
+from app.services.user_service import create_user
+from app.db.crud.user import get_user_by_username
 from app.db.db_setup import get_db
 from app.utils.auth import verify_password, create_access_token
 from pydantic import BaseModel
@@ -24,7 +25,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login")
 def login(req: LoginRequest, db: Session = Depends(get_db)):
     user = get_user_by_username(db, req.username)
-    if not user or not verify_password(req.password, user.hashed_password):
+    if not user or not verify_password(req.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = create_access_token({"sub": user.username})

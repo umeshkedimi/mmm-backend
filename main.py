@@ -20,7 +20,7 @@ def validate_config():
 validate_config()
 
 # ✅ Import after env is loaded
-from app.routers import trade_routes, auth_routes, broker_routes, admin_router
+from app.routers import trade_routes, auth_routes, broker_routes, admin_router, broker_account
 from app.services.trade_watcher import monitor_trades
 
 app = FastAPI(
@@ -38,6 +38,7 @@ app.include_router(trade_routes.router)
 app.include_router(auth_routes.router)
 app.include_router(broker_routes.router)
 app.include_router(admin_router.router)
+app.include_router(broker_account.router)
 
 # ✅ Start watcher thread
 watcher_thread = threading.Thread(target=monitor_trades, daemon=True)

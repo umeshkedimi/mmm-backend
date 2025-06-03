@@ -1,77 +1,52 @@
-# app/services/trade_monitor.py
-
 import asyncio
-import datetime
-from sqlalchemy.orm import Session
-from app.db.db_setup import SessionLocal
-from app.db.models.user import User
+from datetime import datetime, time
 from app.db.models.broker_account import BrokerAccount
-from app.services.dhan_service import get_live_pnl, exit_position
-from app.utils.telegram import send_telegram_message
+from app.db.models.user import User
+from app.db.db_setup import SessionLocal
+from app.services.broker.dhan import get_pnl, exit_all_positions  # Placeholder functions
+from app.utils.telegram import send_telegram_message  # Optional
+from sqlalchemy.orm import Session
 
-START_TIME = datetime.time(hour=9, minute=10)
-END_TIME = datetime.time(hour=15, minute=35)
+async def monitor_single_user(user_id: int, broker: BrokerAccount):
+    session: Session = SessionLocal()
 
-class TradeMonitorManager:
-    def __init__(self):
-        self.user_tasks = {}
+    try:
+        print(f"🔍 Monitoring started for user_id: {user_id} | {broker.index} | {broker.direction}")
 
-    async def start_monitoring(self):
-        print("🚀 Starting Trade Monitor Manager...")
         while True:
-            now = datetime.datetime.now().time()
-            if START_TIME <= now <= END_TIME:
-                await self._start_all_users()
-            else:
-                await self._stop_all_users()
-            await asyncio.sleep(60)
+            now = datetime.now().time()
 
-    async def _start_all_users(self):
-        db = SessionLocal()
-        try:
-            users = db.query(User).filter(User.is_active == True).all()
-            for user in users:
-                if user.id not in self.user_tasks:
-                    print(f"✅ Starting monitor for user: {user.username}")
-                    self.user_tasks[user.id] = asyncio.create_task(self._monitor_user(user))
-        finally:
-            db.close()
+            # Stop monitoring after 3:35 PM
+            if now > time(15, 35):
+                print(f"⏹️ Monitoring ended for user_id: {user_id}")
+                break
 
-    async def _stop_all_users(self):
-        for user_id, task in self.user_tasks.items():
-            print(f"🛑 Stopping monitor for user ID {user_id}")
-            task.cancel()
-        self.user_tasks.clear()
+            # Optional: Add market open condition
+            if now < time(9, 10):
+                await asyncio.sleep(5)
+                continue
 
-    async def _monitor_user(self, user: User):
-        db = SessionLocal()
-        try:
-            broker_account: BrokerAccount = db.query(BrokerAccount).filter(
-                BrokerAccount.user_id == user.id
-            ).first()
+            # Fetch PnL
+            pnl = get_pnl(broker)  # Implemented separately per broker
+            print(f"📈 User {user_id} PnL: ₹{pnl:.2f}")
 
-            if not broker_account:
-                print(f"❌ No broker account for user: {user.username}")
-                return
+            # Check SL or Target
+            if broker.stop_loss and pnl <= -broker.stop_loss:
+                print(f"🛑 SL Hit for user {user_id} → Exiting")
+                exit_all_positions(broker)
+                send_telegram_message(broker.telegram_chat_id, "🚨 Stop Loss hit. Position exited.")
+                break
 
-            while True:
-                try:
-                    pnl, sl, target = await get_live_pnl(broker_account)
-                    print(f"📈 {user.username} → PnL: ₹{pnl} | SL: ₹{sl} | Target: ₹{target}")
+            if broker.target and pnl >= broker.target:
+                print(f"🎯 Target Hit for user {user_id} → Exiting")
+                exit_all_positions(broker)
+                send_telegram_message(broker.telegram_chat_id, "✅ Target achieved. Position exited.")
+                break
 
-                    if pnl <= -sl:
-                        await exit_position(broker_account)
-                        await send_telegram_message(user.username, f"🛑 SL Hit! Exiting positions.")
-                        break
+            await asyncio.sleep(5)  # Wait before next check
 
-                    elif pnl >= target:
-                        await exit_position(broker_account)
-                        await send_telegram_message(user.username, f"✅ Target Hit! Booking profits.")
-                        break
+    except Exception as e:
+        print(f"❌ Error while monitoring user {user_id}: {e}")
 
-                    await asyncio.sleep(15)
-                except asyncio.CancelledError:
-                    print(f"🔁 Monitor cancelled for {user.username}")
-                    break
-        finally:
-            db.close()
+    finally:
+        session.close()

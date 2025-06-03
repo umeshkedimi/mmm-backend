@@ -1,26 +1,32 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
-
 class BrokerAccountBase(BaseModel):
-    broker_name: Optional[str] = Field("dhan", example="dhan")
-    client_id: str = Field(..., example="DHAN123456")
-    access_token: str = Field(..., example="abcxyz123token")
-    telegram_chat_id: Optional[str] = Field(None, example="-1001234567890")
-    lot_size: int = Field(..., example=15)
-    index: str = Field(..., example="banknifty")  # "nifty" or "banknifty"
-    direction: str = Field(..., example="sell")  # "buy" or "sell"
-    is_active: Optional[bool] = Field(True, example=True)
-
+    broker_name: str
+    client_id: str
+    access_token: str
+    telegram_chat_id: Optional[str]
+    telegram_bot_token: Optional[str]
+    lot_size: int
+    index: str  # "nifty" or "banknifty"
+    direction: str  # "buy" or "sell"
+    stop_loss: Optional[float]
+    target: Optional[float]
+    is_active: bool = True
 
 class BrokerAccountCreate(BrokerAccountBase):
     pass
 
-
-class BrokerAccountUpdate(BrokerAccountBase):
-    pass
-
+class BrokerAccountUpdate(BaseModel):
+    telegram_chat_id: Optional[str]
+    telegram_bot_token: Optional[str]
+    access_token: Optional[str]
+    lot_size: Optional[int]
+    direction: Optional[str]
+    stop_loss: Optional[float]
+    target: Optional[float]
+    is_active: Optional[bool]
 
 class BrokerAccountOut(BrokerAccountBase):
     id: int

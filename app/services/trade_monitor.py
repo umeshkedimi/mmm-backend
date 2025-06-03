@@ -3,7 +3,7 @@ from datetime import datetime, time
 from sqlalchemy.orm import Session
 from app.db.models.broker_account import BrokerAccount
 from app.db.db_setup import SessionLocal
-from app.services.broker.dhan import get_pnl, exit_all_positions  # Replace with real implementations
+from app.services.brokers.dhan_broker import get_pnl, exit_all_positions  # Replace with real implementations
 from app.utils.telegram import send_telegram_message
 
 

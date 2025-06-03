@@ -1,5 +1,6 @@
 import requests
 from app.db.models.broker_account import BrokerAccount
+from app.utils.broker_utils import get_atm_strike  # Assume you have this utility function
 
 # Optional: Add your own logger if needed
 import logging
@@ -77,4 +78,70 @@ def exit_all_positions(broker: BrokerAccount):
 
     except Exception as e:
         logger.error(f"❌ [DHAN] Kill switch failed: {e}")
+        return {"error": str(e)}
+
+
+# --- Place ATM Option Order ---
+def place_order(broker: BrokerAccount, option_type: str) -> dict:
+    """
+    Places an ATM CE/PE market order.
+    :param broker: BrokerAccount object
+    :param option_type: "CE" or "PE"
+    """
+    try:
+        # Step 1: Get ATM Option Symbol from broker.index ("nifty" or "banknifty")
+        # For now, hardcoded dummy symbols — in production, fetch dynamically or from DB
+        if broker.index.lower() == "banknifty":
+            symbol = get_atm_strike(broker)  # Dummy CE/PE symbol
+        elif broker.index.lower() == "nifty":
+            symbol = get_atm_strike(broker)  # Dummy CE/PE symbol
+        else:
+            raise ValueError("Invalid index")
+
+        transaction_type = "BUY" if broker.direction == "buy" else "SELL"
+        if option_type.upper() == "PE":
+            symbol = symbol.replace("CE", "PE")
+        elif option_type.upper() == "CE":
+            symbol = symbol.replace("PE", "CE")
+
+        url = "https://api.dhan.co/orders"
+        headers = get_dhan_headers(broker)
+        payload = {
+            "securityId": symbol,
+            "exchangeSegment": "NSE_OPTIDX",
+            "transactionType": transaction_type,
+            "quantity": broker.lot_size,
+            "orderType": "MARKET",
+            "productType": "INTRADAY",
+            "price": 0,
+            "validity": "DAY",
+        }
+
+        response = requests.post(url, json=payload, headers=headers)
+        response.raise_for_status()
+
+        logger.info(f"✅ [DHAN] Order placed: {transaction_type} {symbol} x {broker.lot_size}")
+        return response.json()
+
+    except Exception as e:
+        logger.error(f"❌ [DHAN] Order failed: {e}")
+        return {"error": str(e)}
+
+# --- Disable Kill Switch ---
+def disable_killswitch(broker: BrokerAccount) -> dict:
+    """
+    Calls Dhan API to disable the kill switch if supported.
+    """
+    try:
+        url = "https://api.dhan.co/disable-killswitch"  # Replace with actual endpoint if different
+        headers = get_dhan_headers(broker)
+
+        response = requests.post(url, headers=headers)
+        response.raise_for_status()
+
+        logger.info(f"✅ [DHAN] Kill switch disabled for user {broker.client_id}")
+        return {"status": "disabled"}
+
+    except Exception as e:
+        logger.error(f"❌ [DHAN] Failed to disable kill switch: {e}")
         return {"error": str(e)}

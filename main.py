@@ -23,6 +23,7 @@ validate_config()
 # ✅ Delayed imports (after env is loaded)
 from app.routers import auth_routes, broker_account
 from app.services.trade_monitor import monitor_all_users
+from app.services.telegram_listener import run_telegram_bot
 
 # ✅ Initialize FastAPI app
 app = FastAPI(
@@ -43,6 +44,7 @@ app.include_router(broker_account.router)
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(monitor_all_users())
+    asyncio.create_task(run_telegram_bot())
 
 # ✅ Run via `uvicorn main:app --reload`
 if __name__ == "__main__":

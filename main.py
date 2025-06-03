@@ -1,13 +1,14 @@
-from fastapi import FastAPI
-import uvicorn
-import threading
-from dotenv import load_dotenv
-import os
+# main.py
 
-# ✅ Load environment variables
+import os
+import asyncio
+from fastapi import FastAPI
+from dotenv import load_dotenv
+
+# ✅ Load environment variables first
 load_dotenv(override=True)
 
-# ✅ Validate critical env config
+# ✅ Validate critical config
 def validate_config():
     required_keys = ["DRY_RUN", "API_KEY_HEADER"]
     for key in required_keys:
@@ -19,30 +20,31 @@ def validate_config():
 
 validate_config()
 
-# ✅ Import after env is loaded
+# ✅ Delayed imports (after env is loaded)
 from app.routers import auth_routes, broker_account
-from app.services.trade_watcher import monitor_trades
+from app.services.trade_monitor import monitor_all_users
 
+# ✅ Initialize FastAPI app
 app = FastAPI(
     title="BankNifty MCP Server",
-    description="A modular MCP server to manage BankNifty trades using Zerodha kite API",
+    description="A modular MCP server to manage BankNifty trades using Zerodha/Dhan API",
     version="1.0.0",
     openapi_tags=[
         {"name": "Auth", "description": "User registration and login"},
-        {"name": "Trade", "description": "Order execution routes"},
-        {"name": "Broker Accounts", "description": "Manage linked broker accounts"}
+        {"name": "Broker Accounts", "description": "Manage linked broker accounts"},
     ]
 )
 
-# app.include_router(trade_routes.router)
+# ✅ Register routers
 app.include_router(auth_routes.router)
-# app.include_router(broker_routes.router)
-# app.include_router(admin_router.router)
 app.include_router(broker_account.router)
 
-# ✅ Start watcher thread
-watcher_thread = threading.Thread(target=monitor_trades, daemon=True)
-watcher_thread.start()
+# ✅ Start background trade monitor on app startup
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(monitor_all_users())
 
+# ✅ Run via `uvicorn main:app --reload`
 if __name__ == "__main__":
+    import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

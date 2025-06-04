@@ -5,7 +5,7 @@ from app.db.models import User
 import datetime
 import logging
 from sqlalchemy.orm import Session
-from app.db.db_setup import get_db
+from app.db.db_setup import get_db, SessionLocal
 from app.services.kite_service import get_kite
 from app.db.crud.trade_log import create_trade_log
 from app.db.schemas import TradeLogCreate
@@ -72,15 +72,15 @@ def place_order(trade_type: str, user: User = None):
         )
         logger.info(f"✅ Order placed: {symbol}")
 
-        db: Session = get_db()
-        create_trade_log(db, TradeLogCreate(
-            symbol=symbol,
-            direction=trade_type,
-            quantity=30,
-            price=kite.ltp(f"NFO:{symbol}")[f"NFO: + {symbol}"]["last_price"],
-            pnl=None,
-            exit_reason=None
-        ))
+        with SessionLocal() as db:
+            create_trade_log(db, TradeLogCreate(
+                symbol=symbol,
+                direction=trade_type,
+                quantity=30,
+                price=kite.ltp(f"NFO:{symbol}")[f"NFO:{symbol}"]["last_price"],
+                pnl=None,
+                exit_reason=None
+            ))
 
         return {"status": "success", "symbol": symbol, "order_id": order_id}
     except Exception as e:
